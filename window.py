@@ -1,8 +1,10 @@
 import glfw
+import logging
 from input import Input
 import program
 from OpenGL.GL import *
 
+logging.basicConfig()
 
 # Makes a window via glfw and renders to it with Opengl
 class Window:
@@ -32,11 +34,10 @@ class Window:
         ]
         self.pipeline = simple_pipeline
 
-
-
-    @staticmethod
-    def window_size_callback(window, width, height):
-        print("dimensions are "+str(width)+", "+str(height))
+    def window_size_callback(self, window, width, height):
+        self.width = width
+        self.height = height
+        glViewport(0, 0, self.width, self.height)
 
     def run(self):
         program_data = {'input': self.input}
