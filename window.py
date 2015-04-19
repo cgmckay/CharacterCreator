@@ -2,6 +2,8 @@ import glfw
 import logging
 from input import Input
 import program
+import configuration.programPipeline as pipeline
+import configuration.shaders as environment
 from OpenGL.GL import *
 
 logging.basicConfig()
@@ -28,13 +30,10 @@ class Window:
         self.print_opengl_data()
         glViewport(0, 0, self.width, self.height)
         glEnable(GL_DEPTH_TEST)
-        simple_pipeline = [
-            program.SimpleMatricesSetupProgram(self),
-            program.SimpleRenderingProgram(self)
-        ]
-        self.pipeline = simple_pipeline
+        self.pipeline = pipeline.get_cylinder_pipeline(self)
 
     def window_size_callback(self, window, width, height):
+        logging.info("dimensions are now "+str(width)+", "+str(height))
         self.width = width
         self.height = height
         glViewport(0, 0, self.width, self.height)

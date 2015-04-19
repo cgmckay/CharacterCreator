@@ -7,7 +7,7 @@ import vispy.util.transforms as transform
 from OpenGL.GL import *
 
 import shader as shader_class
-from configuration import environment
+from configuration import shaders
 import openglUtils
 
 logging.basicConfig()
@@ -163,7 +163,7 @@ class SimpleRenderingProgram(OpenGLProgram):
         glVertexAttribPointer(0, 3, GL_FLOAT, False, stride, offset)
 
     def __init__(self, window):
-        shader = shader_class.Shader(environment.simpleShader)
+        shader = shader_class.Shader(shaders.simpleShader)
         uniforms = {'mvpMatrix': -1}
         positions = numpy.array([
             # a square
@@ -185,7 +185,43 @@ class SimpleRenderingProgram(OpenGLProgram):
         glClearColor(.1, .36, .36, 1)
         self.start_program()
         self.setup_uniforms(program_data)
-        # self.setup_buffer()
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4)
         openglUtils.check_for_errors()
         self.stop_program()
+
+
+class VectorCylinderProgram(OpenGLProgram):
+    def __init__(self, window):
+        shader = shader_class.Shader(shaders.cylinderShader)
+        uniforms = {'mvpMatrix': -1}
+        positions = numpy.array([
+            # a line
+            (1,  0, 0),
+            (-1, 0, 0),
+        ], numpy.float32)
+        super().__init__(window, shader, uniforms, positions)
+        self.required_data = ['modelviewMatrix', 'projectionMatrix']
+        self.name = "SimpleRendering"
+
+    def run(self, program_data):
+        """
+        Display a cylinder, distorted using two bezier points
+        """
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+        glClearColor(.1, .36, .36, 1)
+        self.start_program()
+        self.setup_uniforms(program_data)
+        glDrawArrays(GL_LINE_STRIP, 0, 2)
+        openglUtils.check_for_errors()
+        self.stop_program()
+
+    def init_attributes(self):
+        openglUtils.enable_vertex_attributes(1)
+
+        offset = ctypes.c_void_p(0)
+        stride = self.positions.strides[0]
+        glVertexAttribPointer(0, 3, GL_FLOAT, False, stride, offset)
+
+    def setup_uniforms(self, program_data):
+        mvp_matrix = program_data['modelviewMatrix'].dot(program_data['projectionMatrix'])
+        glUniformMatrix4fv(self.uniforms['mvpMatrix'], 1, False, mvp_matrix)
