@@ -1,12 +1,11 @@
 import glfw
 import logging
 from input import Input
-import program
-import configuration.programPipeline as pipeline
-import configuration.shaders as environment
+import configuration.programPipeline as programPipeline
 from OpenGL.GL import *
 
 logging.basicConfig()
+
 
 # Makes a window via glfw and renders to it with Opengl
 class Window:
@@ -27,10 +26,11 @@ class Window:
         glfw.set_key_callback(self.window, self.input.key_callback)
         glfw.set_mouse_button_callback(self.window, self.input.mouse_button_callback)
         glfw.set_window_size_callback(self.window, self.window_size_callback)
+        glfw.set_cursor_pos_callback(self.window, self.input.cursor_position_callback)
         self.print_opengl_data()
         glViewport(0, 0, self.width, self.height)
         glEnable(GL_DEPTH_TEST)
-        self.pipeline = pipeline.get_cylinder_pipeline(self)
+        self.pipeline = programPipeline.get_cylinder_pipeline(self)
 
     def window_size_callback(self, window, width, height):
         logging.info("dimensions are now "+str(width)+", "+str(height))

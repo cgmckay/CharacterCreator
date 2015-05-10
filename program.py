@@ -143,9 +143,10 @@ class SimpleMatricesSetupProgram(Program):
         transform.rotate(modelview_matrix, self.rotation[0], 1, 0, 0)
         transform.rotate(modelview_matrix, self.rotation[1], 0, 1, 0)
         transform.rotate(modelview_matrix, self.rotation[2], 0, 0, 1)
-        self.position[0] += self.positional_velocity[0] * (input.keyDown[glfw.KEY_D] - input.keyDown[glfw.KEY_A])
-        self.position[1] += self.positional_velocity[1] * (input.keyDown[glfw.KEY_W] - input.keyDown[glfw.KEY_S])
-        self.position[2] += self.positional_velocity[2] * (input.keyDown[glfw.KEY_E] - input.keyDown[glfw.KEY_Q])
+        if not input.keyDown[glfw.KEY_LEFT_CONTROL]:
+            self.position[0] += self.positional_velocity[0] * (input.keyDown[glfw.KEY_D] - input.keyDown[glfw.KEY_A])
+            self.position[1] += self.positional_velocity[1] * (input.keyDown[glfw.KEY_W] - input.keyDown[glfw.KEY_S])
+            self.position[2] += self.positional_velocity[2] * (input.keyDown[glfw.KEY_E] - input.keyDown[glfw.KEY_Q])
         transform.translate(modelview_matrix, self.position[0], self.position[1], self.position[2])
 
         program_data["modelviewMatrix"] = modelview_matrix
@@ -193,7 +194,7 @@ class SimpleRenderingProgram(OpenGLProgram):
 class VectorCylinderProgram(OpenGLProgram):
     def __init__(self, window):
         shader = shader_class.Shader(shaders.cylinderShader)
-        uniforms = {'mvpMatrix': -1}
+        uniforms = {'mvpMatrix': -1, 'pullPoints': -1}
         positions = numpy.array([
             # a line
             (1,  0, 0),
@@ -202,6 +203,8 @@ class VectorCylinderProgram(OpenGLProgram):
         super().__init__(window, shader, uniforms, positions)
         self.required_data = ['modelviewMatrix', 'projectionMatrix']
         self.name = "SimpleRendering"
+        self.pullPoints = numpy.zeros([10, 3])
+        self.velocity = [.02, .02, .02]
 
     def run(self, program_data):
         """
@@ -225,3 +228,11 @@ class VectorCylinderProgram(OpenGLProgram):
     def setup_uniforms(self, program_data):
         mvp_matrix = program_data['modelviewMatrix'].dot(program_data['projectionMatrix'])
         glUniformMatrix4fv(self.uniforms['mvpMatrix'], 1, False, mvp_matrix)
+        input = program_data['input']
+        if input.keyDown[glfw.KEY_LEFT_CONTROL]:
+            self.pullPoints[0][0] += self.velocity[0] * (input.keyDown[glfw.KEY_D] - input.keyDown[glfw.KEY_A])
+            self.pullPoints[0][1] += self.velocity[1] * (input.keyDown[glfw.KEY_W] - input.keyDown[glfw.KEY_S])
+            self.pullPoints[0][2] += self.velocity[2] * (input.keyDown[glfw.KEY_E] - input.keyDown[glfw.KEY_Q])
+            self.pullPoints[1] = [.9, 0, 0]
+        glUniform3fv(self.uniforms['pullPoints'], 10, self.pullPoints)
+        glUniform2f(self.uniforms['mousePosition'], input.cursorPosition[0])

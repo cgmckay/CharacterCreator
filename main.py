@@ -1,5 +1,4 @@
 from window import Window
-import ctypes
 
 
 def main():

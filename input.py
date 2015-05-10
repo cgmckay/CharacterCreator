@@ -7,6 +7,10 @@ class Input():
         self.keyCounter = defaultdict(int)
         self.keyDown = defaultdict(bool)
         self.mouseButtonDown = defaultdict(bool)
+        self.cursorPosition = [0, 0]
+
+    def cursor_position_callback(self, window, x, y):
+        self.cursorPosition = [x, y]
 
     def mouse_button_callback(self, window, button, action, mods):
         if action == glfw.PRESS:
