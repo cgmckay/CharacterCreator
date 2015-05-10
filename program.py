@@ -235,4 +235,3 @@ class VectorCylinderProgram(OpenGLProgram):
             self.pullPoints[0][2] += self.velocity[2] * (input.keyDown[glfw.KEY_E] - input.keyDown[glfw.KEY_Q])
             self.pullPoints[1] = [.9, 0, 0]
         glUniform3fv(self.uniforms['pullPoints'], 10, self.pullPoints)
-        glUniform2f(self.uniforms['mousePosition'], input.cursorPosition[0])
